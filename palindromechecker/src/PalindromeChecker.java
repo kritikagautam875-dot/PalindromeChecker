@@ -1,35 +1,71 @@
 import java.util.Stack;
-
-// Encapsulation: Class bundles data (input string) and methods.
-public class PalindromeChecker {
-
-    // Single Responsibility: Only responsible for checking palindromes.
-    public boolean checkPalindrome(String text) {
-        if (text == null) return false;
-        
-        // Data Structure: Using a Stack (LIFO) to reverse the string.
+import java.util.ArrayDeque;
+import java.util.Deque;
+interface PalindromeStrategy {
+    boolean isPalindrome(String input);
+}
+class StackStrategy implements PalindromeStrategy {
+    @Override
+    public boolean isPalindrome(String input) {
+        String cleanInput = input.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
         Stack<Character> stack = new Stack<>();
-        String cleanedText = text.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
 
-        // Push characters onto stack
-        for (char c : cleanedText.toCharArray()) {
+        for (char c : cleanInput.toCharArray()) {
             stack.push(c);
         }
 
-        // Pop and compare
-        StringBuilder reversedText = new StringBuilder();
+        StringBuilder reversed = new StringBuilder();
         while (!stack.isEmpty()) {
-            reversedText.append(stack.pop());
+            reversed.append(stack.pop());
         }
 
-        return cleanedText.equals(reversedText.toString());
+        return cleanInput.equals(reversed.toString());
+    }
+}
+class DequeStrategy implements PalindromeStrategy {
+    @Override
+    public boolean isPalindrome(String input) {
+        String cleanInput = input.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+        Deque<Character> deque = new ArrayDeque<>();
+
+        for (char c : cleanInput.toCharArray()) {
+            deque.addLast(c);
+        }
+
+        while (deque.size() > 1) {
+            if (!deque.removeFirst().equals(deque.removeLast())) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+public class PalindromeChecker {
+    private PalindromeStrategy strategy;
+
+    // Inject strategy via constructor or setter
+    public void setStrategy(PalindromeStrategy strategy) {
+        this.strategy = strategy;
     }
 
+    public boolean check(String text) {
+        if (strategy == null) {
+            throw new IllegalStateException("Strategy not set!");
+        }
+        return strategy.isPalindrome(text);
+    }
+}
+ class Main {
     public static void main(String[] args) {
         PalindromeChecker checker = new PalindromeChecker();
-        String testString = "Racecar";
-        
-        // Exposed Method: User only interacts with this.
-        System.out.println(testString + " is palindrome? " + checker.checkPalindrome(testString));
+        String testWord = "Racecar";
+
+        // Dynamic Injection 1: Stack
+        checker.setStrategy(new StackStrategy());
+        System.out.println("Stack Result: " + checker.check(testWord));
+
+        // Dynamic Injection 2: Deque
+        checker.setStrategy(new DequeStrategy());
+        System.out.println("Deque Result: " + checker.check(testWord));
     }
 }
