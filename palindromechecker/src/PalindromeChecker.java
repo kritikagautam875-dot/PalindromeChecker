@@ -1,72 +1,37 @@
-import java.util.Stack;
-import java.util.ArrayDeque;
-import java.util.Deque;
-interface PalindromeStrategy {
-    boolean isPalindrome(String input);
-}
-class StackStrategy implements PalindromeStrategy {
-    @Override
-    public boolean isPalindrome(String input) {
-        String cleanInput = input.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
-        Stack<Character> stack = new Stack<>();
+import java.util.ArrayList;
+import java.util.List;
 
-        for (char c : cleanInput.toCharArray()) {
-            stack.push(c);
-        }
-
-        StringBuilder reversed = new StringBuilder();
-        while (!stack.isEmpty()) {
-            reversed.append(stack.pop());
-        }
-
-        return cleanInput.equals(reversed.toString());
-    }
-}
-class DequeStrategy implements PalindromeStrategy {
-    @Override
-    public boolean isPalindrome(String input) {
-        String cleanInput = input.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
-        Deque<Character> deque = new ArrayDeque<>();
-
-        for (char c : cleanInput.toCharArray()) {
-            deque.addLast(c);
-        }
-
-        while (deque.size() > 1) {
-            if (!deque.removeFirst().equals(deque.removeLast())) {
-                return false;
-            }
-        }
-        return true;
-    }
-}
 public class PalindromeChecker {
-    private PalindromeStrategy strategy;
 
-    // Inject strategy via constructor or setter
-    public void setStrategy(PalindromeStrategy strategy) {
-        this.strategy = strategy;
-    }
-
-    public boolean check(String text) {
-        if (strategy == null) {
-            throw new IllegalStateException("Strategy not set!");
-        }
-        return strategy.isPalindrome(text);
-    }
-}
- class Main {
     public static void main(String[] args) {
-        PalindromeChecker checker = new PalindromeChecker();
-        String testWord = "Racecar";
 
-        // Dynamic Injection 1: Stack
-        checker.setStrategy(new StackStrategy());
-        System.out.println("Stack Result: " + checker.check(testWord));
+        String testInput = "A man a plan a canal Panama".repeat(100);
 
-        // Dynamic Injection 2: Deque
-        checker.setStrategy(new DequeStrategy());
-        System.out.println("Deque Result: " + checker.check(testWord));
+        List<PalindromeStrategy> strategies = new ArrayList<>();
+        strategies.add(new StackStrategy());
+        strategies.add(new DequeStrategy());
+
+        System.out.println("--- Palindrome Performance Benchmark ---");
+
+        for (PalindromeStrategy strategy : strategies) {
+
+            // Warm-up
+            for (int i = 0; i < 1000; i++)
+                strategy.isPalindrome(testInput);
+
+            long startTime = System.nanoTime();
+            boolean result = strategy.isPalindrome(testInput);
+            long endTime = System.nanoTime();
+
+            long duration = endTime - startTime;
+
+            System.out.printf(
+                "Strategy: %-15s | Time: %10d ns | Result: %b%n",
+                strategy.getClass().getSimpleName(),
+                duration,
+                result
+            );
+        }
     }
 }
 
