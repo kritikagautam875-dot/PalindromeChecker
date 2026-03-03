@@ -1,49 +1,36 @@
-import java.util.Stack;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Stack;
-public class PalindromeChecker {
-        public static void main(String[] args) {
-            String input = "racecar";
+import java.util.ArrayDeque;
+import java.util.Deque;
+    public class PalindromeChecker {
 
-            // Data Structures
-            Queue<Character> queue = new LinkedList<>();
-            Stack<Character> stack = new Stack<>();
+        public static boolean isPalindrome(String str) {
+            // 1. Insert characters into deque
+            Deque<Character> deque = new ArrayDeque<>();
+            for (char c : str.toCharArray()) {
 
-            System.out.println("Input String: " + input);
-
-            // Flow: Enqueue characters and Push characters to stack
-            for (char character : input.toCharArray()) {
-                queue.add(character); // Enqueue: adds to the rear
-                stack.push(character); // Push: adds to the top
-            }
-
-            System.out.println("\n--- Processing Data Structures ---");
-            System.out.println("Queue (FIFO order): " + queue);
-            System.out.println("Stack (LIFO order): " + stack);
-
-
-            // Flow: Compare dequeue vs pop (Palindrome check logic)
-            boolean isPalindrome = true;
-            System.out.println("\n--- Comparing Dequeue vs Pop ---");
-
-            while (!queue.isEmpty()) {
-                char queueChar = queue.remove(); // Dequeue from the front (FIFO)
-                char stackChar = stack.pop();    // Pop from the top (LIFO)
-
-                System.out.println("Dequeue: " + queueChar + ", Pop: " + stackChar);
-
-                if (queueChar != stackChar) {
-                    isPalindrome = false;
-                    break; // Mismatch found, not a palindrome
+                if (Character.isLetterOrDigit(c)) {
+                    deque.addLast(Character.toLowerCase(c));
                 }
             }
-            // Display results
-            System.out.println("\n Result ");
-            if (isPalindrome) {
-                System.out.println("The original string \"" + input + "\" is a palindrome.");
-            } else {
-                System.out.println("The original string \"" + input + "\" is NOT a palindrome.");
+            // 2. Remove first & last and compare until empty or one element left
+            while (deque.size() > 1) {
+                Character first = deque.pollFirst(); // Removes and returns the first element
+                Character last = deque.pollLast();   // Removes and returns the last element
+
+                // 3. Compare
+                if (!first.equals(last)) {
+                    return false; // Not a palindrome if characters don't match
+                }
             }
+            // If the loop completes (deque is empty or has one element), it's a palindrome
+            return true;
+        }
+        public static void main(String[] args) {
+            String testString1 = "radar";
+            String testString2 = "hello";
+            String testString3 = "Deed"; // will be treated as "deed" due to case handling
+
+            System.out.println("Is \"" + testString1 + "\" a palindrome? " + isPalindrome(testString1));
+            System.out.println("Is \"" + testString2 + "\" a palindrome? " + isPalindrome(testString2));
+            System.out.println("Is \"" + testString3 + "\" a palindrome? " + isPalindrome(testString3));
         }
     }
